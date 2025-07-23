@@ -98,7 +98,7 @@ function configurarColor(types) {
 const tipoColores = {
     electric: '#FFDF20',
     normal: '#FEF3C6',
-    fire: '#FF675C',    
+    fire: '#FF675C',
     water: '#0596C7',
     ice: '#AFEAFD',
     rock: '#999799',
@@ -116,23 +116,33 @@ const tipoColores = {
     default: '#2A1A1F',
 }
 
-function cargarPokemon(pokemon) {
-    fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}/`)
-        .then((r) => r.json())
-        .then((data) => mostrarListaPokemones(data))
-        .catch((error) => mostrarError());
+async function cargarPokemon(pokemon) {
+    const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon/${pokemon}/`);
+    const data = await respuesta.json();
+    return data;
 }
 
-function cargarPokemones(offset, limit) {
+async function cargarPokemones(offset, limit) {
     for (let i = offset; i <= offset + limit; i++) {
-        cargarPokemon(i);
+        try {
+            const data = await cargarPokemon(i);
+            mostrarListaPokemones(data);
+        } catch (error) {
+            mostrarError();
+        }
     }
 }
 
-$searchBtn.addEventListener('click', (e) => {
+$searchBtn.addEventListener('click', async function (e) {
     e.preventDefault();
-    cargarPokemon($searchInput.value.trim());
+    const inputValue = $searchInput.value.trim();
     $pokemonLista.innerHTML = "";
+    try {
+        const data = await cargarPokemon(inputValue);
+        mostrarListaPokemones(data);
+    } catch (error) {
+        mostrarError();
+    }
 })
 
 $previousBtn.addEventListener('click', () => {
@@ -150,7 +160,7 @@ $nextBtn.addEventListener('click', () => {
 });
 
 function mostrarError() {
-    $pokemonError.style.display = 'block';   
+    $pokemonError.style.display = 'block';
 }
 
 function inicializar() {
